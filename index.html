@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รายงานการบริหารจัดการหมายจับ - Warrant Management Dashboard</title>
+    
+    <!-- FC Iconic Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js Library for Data Visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'FC Iconic', 'Sarabun', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #00264B;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* LOGIN SCREEN */
+        #loginScreen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #00264B;
+            z-index: 9999;
+        }
+
+        .login-container {
+            background: white;
+            padding: 50px 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+        }
+
+        .login-logo {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 50%;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 102, 204, 0.3);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .login-logo img {
+            width: 160px !important;
+            height: 160px !important;
+            object-fit: contain;
+            display: block;
+            max-width: 160px;
+            max-height: 160px;
+        }
+
+        .login-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .login-subtitle {
+            font-size: 16px;
+            color: #718096;
+            margin-bottom: 30px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: #a0aec0;
+        }
+
+        #passwordInput {
+            width: 100%;
+            padding: 15px 15px 15px 50px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        #passwordInput:focus {
+            outline: none;
+            border-color: #0066CC;
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        #loginButton {
+            background: linear-gradient(135deg, #0066CC 0%, #003D7A 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        #loginButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 102, 204, 0.3);
+        }
+
+        #loginButton:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            background: #fff5f5;
+            border: 2px solid #fc8181;
+            color: #c53030;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            display: none;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        #dashboardContent {
+            display: none;
+        }
+
+        #dashboardContent.unlocked {
+            display: block;
+        }
+
+        /* LOGOUT BUTTON */
+        .logout-btn {
+            background: linear-gradient(135deg, #fc8181 0%, #c53030 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 3px 15px rgba(197, 48, 48, 0.3);
+            margin-top: 10px;
+        }
+
+        .logout-btn.show {
+            display: flex;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(197, 48, 48, 0.4);
+        }
+
+        .logout-btn:active {
+            transform: translateY(0);
+        }
+
+        .logout-icon {
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 50%;
+            padding: 10px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .logo img {
+            width: 60px !important;
+            height: 60px !important;
+            object-fit: contain;
+            display: block;
+            max-width: 60px;
+            max-height: 60px;
+        }
+
+        .header-title h1 {
+            color: #2d3748;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .header-title p {
+            color: #718096;
+            font-size: 16px;
+        }
+
+        .header-date {
+            text-align: right;
+            color: #718096;
+        }
+
+        .header-date .date {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 45px rgba(0,0,0,0.15);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+        }
+
+        .stat-card.total::before { background: #0066CC; }
+        .stat-card.unit::before { background: #48bb78; }
+        .stat-card.warning::before { background: #f56565; }
+        .stat-card.priority::before { background: #ed8936; }
+
+        .stat-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 16px;
+            color: #718096;
+            font-weight: 500;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+        }
+
+        .chart-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #e2e8f0;
+        }
+
+        /* Priority Cards */
+        .priority-section {
+            margin-bottom: 30px;
+        }
+
+        .priority-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .priority-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+
+        .priority-card:hover {
+            transform: scale(1.05);
+        }
+
+        .priority-badge {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .priority-a .priority-badge { background: #e53e3e; }
+        .priority-b .priority-badge { background: #dd6b20; }
+        .priority-c .priority-badge { background: #d69e2e; }
+        .priority-d .priority-badge { background: #38a169; }
+        .priority-f .priority-badge { background: #3182ce; }
+        .priority-g .priority-badge { background: #805ad5; }
+
+        .priority-count {
+            font-size: 32px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .priority-label {
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 8px;
+        }
+
+        .priority-desc {
+            font-size: 12px;
+            color: #a0aec0;
+        }
+
+        /* Alert Section */
+        .alert-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+
+        .alert-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #fed7d7;
+        }
+
+        .alert-icon {
+            font-size: 36px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .alert-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #c53030;
+        }
+
+        .alert-item {
+            background: #fff5f5;
+            border-left: 5px solid #fc8181;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .alert-item:hover {
+            background: #fed7d7;
+            transform: translateX(5px);
+        }
+
+        .alert-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .alert-case {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .alert-days {
+            background: #c53030;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .alert-details {
+            color: #4a5568;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .alert-suspect {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        /* Table */
+        .table-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #0066CC 0%, #003D7A 100%);
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+            color: #4a5568;
+        }
+
+        tbody tr:hover {
+            background: #f7fafc;
+        }
+
+        .priority-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .priority-tag.a { background: #e53e3e; }
+        .priority-tag.b { background: #dd6b20; }
+        .priority-tag.c { background: #d69e2e; }
+        .priority-tag.d { background: #38a169; }
+        .priority-tag.f { background: #3182ce; }
+        .priority-tag.g { background: #805ad5; }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            background: #48bb78;
+            color: white;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            margin-top: 30px;
+            font-size: 14px;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #a0aec0;
+            font-size: 16px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .header-left {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen">
+        <div class="login-container">
+            <div class="login-logo">
+                <img src="./cib-logo.png" alt="CIB Logo" style="width: 160px; height: 160px; object-fit: contain; display: block;">
+            </div>
+            <h1 class="login-title">ระบบรายงานการบริหารจัดการหมายจับ</h1>
+            <p class="login-subtitle">Warrant Management System - CIB</p>
+            
+            <div class="login-form">
+                <div class="input-group">
+                    <span class="input-icon">🔑</span>
+                    <input 
+                        type="password" 
+                        id="passwordInput" 
+                        placeholder="กรุณาใส่รหัสผ่าน"
+                        autocomplete="off"
+                    >
+                </div>
+                
+                <div class="error-message" id="errorMessage">
+                    ❌ รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง
+                </div>
+                
+                <button type="button" id="loginButton">
+                    เข้าสู่ระบบ
+                </button>
+            </div>
+            
+            <p style="margin-top: 20px; color: #a0aec0; font-size: 12px;">
+                🔒 ระบบปกป้องด้วยรหัสผ่าน | CIB Internal Use Only
+            </p>
+        </div>
+    </div>
+
+    <!-- DASHBOARD CONTENT -->
+    <div id="dashboardContent">
+        <div class="container">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-left">
+                    <div class="logo">
+                        <img src="./cib-logo.png" alt="CIB Logo" style="width: 60px; height: 60px; object-fit: contain; display: block;">
+                    </div>
+                    <div class="header-title">
+                        <h1>รายงานการบริหารจัดการหมายจับ</h1>
+                        <p>Warrant Management Dashboard | กองบัญชาการตำรวจสอบสวนกลาง</p>
+                    </div>
+                </div>
+                <div class="header-date">
+                    <div class="date" id="currentDate"></div>
+                    <div>อัพเดทล่าสุด</div>
+                    <button class="logout-btn" id="logoutBtn">
+                        <span class="logout-icon">🚪</span>
+                        <span>ออกจากระบบ</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card total">
+                    <div class="stat-icon">📋</div>
+                    <div class="stat-value" id="totalWarrants">-</div>
+                    <div class="stat-label">หมายจับทั้งหมด</div>
+                </div>
+                <div class="stat-card unit">
+                    <div class="stat-icon">🏢</div>
+                    <div class="stat-value" id="totalUnits">-</div>
+                    <div class="stat-label">หน่วยงานที่รายงาน</div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-value" id="expiringWarrants">-</div>
+                    <div class="stat-label">ใกล้หมดอายุความ (< 1 ปี)</div>
+                </div>
+                <div class="stat-card priority">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-value" id="highPriority">-</div>
+                    <div class="stat-label">คดีเร่งด่วน (A, B, C)</div>
+                </div>
+            </div>
+
+            <!-- Priority Section -->
+            <div class="priority-section">
+                <div class="chart-card">
+                    <h2 class="chart-title">📊 จำแนกตามระดับความสำคัญทางคดี (Priority Classification)</h2>
+                    <div class="priority-grid">
+                        <div class="priority-card priority-a">
+                            <div class="priority-badge">A</div>
+                            <div class="priority-count" id="priority-a-count">0</div>
+                            <div class="priority-label">คดีผู้มีอิทธิพล</div>
+                            <div class="priority-desc">Influential Cases</div>
+                        </div>
+                        <div class="priority-card priority-b">
+                            <div class="priority-badge">B</div>
+                            <div class="priority-count" id="priority-b-count">0</div>
+                            <div class="priority-label">คดีสำคัญ</div>
+                            <div class="priority-desc">High Impact / Public Interest</div>
+                        </div>
+                        <div class="priority-card priority-c">
+                            <div class="priority-badge">C</div>
+                            <div class="priority-count" id="priority-c-count">0</div>
+                            <div class="priority-label">หมายแดง</div>
+                            <div class="priority-desc">Interpol Red Notice</div>
+                        </div>
+                        <div class="priority-card priority-d">
+                            <div class="priority-badge">D</div>
+                            <div class="priority-count" id="priority-d-count">0</div>
+                            <div class="priority-label">ใกล้หมดอายุความ</div>
+                            <div class="priority-desc">Expiring Soon</div>
+                        </div>
+                        <div class="priority-card priority-f">
+                            <div class="priority-badge">F</div>
+                            <div class="priority-count" id="priority-f-count">0</div>
+                            <div class="priority-label">อยู่ในเรือนจำ</div>
+                            <div class="priority-desc">In Custody</div>
+                        </div>
+                        <div class="priority-card priority-g">
+                            <div class="priority-badge">G</div>
+                            <div class="priority-count" id="priority-g-count">0</div>
+                            <div class="priority-label">เสียชีวิต</div>
+                            <div class="priority-desc">Deceased</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h2 class="chart-title">📈 จำนวนหมายจับแยกตามหน่วยงาน</h2>
+                    <canvas id="unitChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h2 class="chart-title">🎯 สัดส่วนตามระดับความสำคัญ</h2>
+                    <canvas id="priorityChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Alert Section -->
+            <div class="alert-section">
+                <div class="alert-header">
+                    <div class="alert-icon">🚨</div>
+                    <div>
+                        <h2 class="alert-title">แจ้งเตือน: หมายจับใกล้หมดอายุความ (RED FLAG / WARNING)</h2>
+                        <p style="color: #718096; font-size: 14px; margin-top: 5px;">กรุณาดำเนินการติดตามโดยเร็วที่สุด</p>
+                    </div>
+                </div>
+                <div id="alertContainer"></div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="table-section">
+                <h2 class="chart-title">📑 รายละเอียดหมายจับทั้งหมด (Warrant Details)</h2>
+                <table id="warrantTable">
+                    <thead>
+                        <tr>
+                            <th>เลขคดี/ปี</th>
+                            <th>เลขหมายจับ/ปี</th>
+                            <th>ชื่อผู้ต้องหา</th>
+                            <th>ข้อหา</th>
+                            <th>หน่วยสังกัด</th>
+                            <th>ระดับ</th>
+                            <th>สถานะ</th>
+                            <th>วันหมดอายุ</th>
+                            <th>เหลือ (วัน)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="warrantTableBody"></tbody>
+                </table>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+                <p>© 2569 กองบัญชาการตำรวจสอบสวนกลาง</p>
+                <p style="margin-top: 5px; opacity: 0.8;">Central Investigation Bureau (CIB)</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CORRECT_PASSWORD = 'cib';
+        
+        // Get elements
+        const loginScreen = document.getElementById('loginScreen');
+        const dashboardContent = document.getElementById('dashboardContent');
+        const passwordInput = document.getElementById('passwordInput');
+        const loginButton = document.getElementById('loginButton');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Login function
+        function checkPassword() {
+            const password = passwordInput.value;
+
+            if (password === CORRECT_PASSWORD) {
+                errorMessage.classList.remove('show');
+                loginScreen.style.animation = 'fadeOut 0.5s ease';
+                
+                setTimeout(function() {
+                    loginScreen.style.display = 'none';
+                    dashboardContent.classList.add('unlocked');
+                    logoutBtn.classList.add('show');
+                    initializeDashboard();
+                }, 500);
+            } else {
+                errorMessage.classList.add('show');
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
+        }
+
+        // Logout function
+        function logout() {
+            dashboardContent.classList.remove('unlocked');
+            logoutBtn.classList.remove('show');
+            loginScreen.style.display = 'flex';
+            loginScreen.style.animation = 'slideIn 0.5s ease';
+            passwordInput.value = '';
+            errorMessage.classList.remove('show');
+            
+            setTimeout(function() {
+                passwordInput.focus();
+            }, 500);
+        }
+
+        // Event listeners
+        loginButton.addEventListener('click', checkPassword);
+        logoutBtn.addEventListener('click', logout);
+        passwordInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
+
+        // Initialize dashboard
+        function initializeDashboard() {
+            const warrantData = {
+                "total_warrants": 8,
+                "units": {
+                    "กก.5 บก.ป.": 2,
+                    "กก.3 บก.ปอท.": 4,
+                    "กก.2 บก.ปอศ.": 2
+                },
+                "priorities": {
+                    "A": 0,
+                    "B": 8,
+                    "C": 0,
+                    "D": 0,
+                    "F": 0,
+                    "G": 0
+                },
+                "expiring_soon": [],
+                "warrant_details": [
+                    {
+                        "case_number": "29/2568",
+                        "warrant_number": "42/2569",
+                        "suspect": "นายสมศักดิ์   สุขอนันต์",
+                        "id_number": "1800900088266",
+                        "charge": "ฉ้อโกงโดยแสดงตนเป็นคนอื่น",
+                        "unit": "กก.5 บก.ป.",
+                        "status": "มีผลบังคับใช้",
+                        "priority": "B",
+                        "issue_date": "01 ต.ค.  2568",
+                        "expiry_date": "01 ต.ค.  2578",
+                        "days_remaining": 3548,
+                        "officer": "พ.ต.ต. จักรี ศิลปสถาปน์",
+                        "phone": "931377221"
+                    },
+                    {
+                        "case_number": "102/2568",
+                        "warrant_number": "2/2569",
+                        "suspect": "นาย  อดิศักดิ์ หน้ากระจาย",
+                        "id_number": "1101501428311",
+                        "charge": "นำเข้าสู่ระบบคอมพิวเตอร์ซึ่งข้อมูลคอมพิวเตอร์ปลอม โดยน่าจะเกิดความเสียหายแก่ผู้อื่นหรือประชาชน",
+                        "unit": "กก.3 บก.ปอท.",
+                        "status": "มีผลบังคับใช้",
+                        "priority": "B",
+                        "issue_date": "11 ก.ค.  2568",
+                        "expiry_date": "11 ก.ค.  2583",
+                        "days_remaining": 5293,
+                        "officer": "ว่าที่ พ.ต.ต. บุณยกร ฐานปัตโต",
+                        "phone": "824645192"
+                    },
+                    {
+                        "case_number": "102/2568",
+                        "warrant_number": "2/2569",
+                        "suspect": "นาย  อดิศักดิ์ หน้ากระจาย",
+                        "id_number": "1101501428311",
+                        "charge": "ผู้ใดกระทำผิดตาม มาตรา 5 อนุ 1 หรือ อนุ2 ผู้นั้นกระทำผิดฐานฟอกเงิน (ความผิดมูลฐานฉ้อโกงประชาชน)",
+                        "unit": "กก.3 บก.ปอท.",
+                        "status": "มีผลบังคับใช้",
+                        "priority": "B",
+                        "issue_date": "11 ก.ค.  2568",
+                        "expiry_date": "11 ก.ค.  2583",
+                        "days_remaining": 5293,
+                        "officer": "ว่าที่ พ.ต.ต. บุณยกร ฐานปัตโต",
+                        "phone": "824645192"
+                    },
+                    {
+                        "case_number": "2/2569",
+                        "warrant_number": "1/2569",
+                        "suspect": "Mr. Ozkan Sarikaya",
+                        "id_number": " ",
+                        "charge": "ผู้ใดนำของที่ผ่านหรือกำลังผ่านพิธีการศุลกากรเข้ามาในราชอาณาจักร หรือส่งของดังกล่าวออกไปนอกราชอาณาจักร โดยหลีกเลี่ยงหรือพยายามหลีกเ",
+                        "unit": "กก.2 บก.ปอศ.",
+                        "status": "มีผลบังคับใช้",
+                        "priority": "B",
+                        "issue_date": "28 เม.ย. 2565",
+                        "expiry_date": "28 เม.ย. 2580",
+                        "days_remaining": 4123,
+                        "officer": "พ.ต.ท. วราพรรณ สุราราษฎร์",
+                        "phone": "984515636"
+                    },
+                    {
+                        "case_number": "6/2569",
+                        "warrant_number": "2/2569",
+                        "suspect": "Mr. Ozkan Sarikaya",
+                        "id_number": "U09185493",
+                        "charge": "ผู้ใดนำของที่ผ่านหรือกำลังผ่านพิธีการศุลกากรเข้ามาในราชอาณาจักร หรือส่งของดังกล่าวออกไปนอกราชอาณาจักร โดยหลีกเลี่ยงหรือพยายามหลีกเ",
+                        "unit": "กก.2 บก.ปอศ.",
+                        "status": "มีผลบังคับใช้",
+                        "priority": "B",
+                        "issue_date": "28 เม.ย. 2565",
+                        "expiry_date": "28 เม.ย. 2580",
+                        "days_remaining": 4123,
+                        "officer": "ว่าที่ พ.ต.ต. สุชาวดี สรรพคุณ",
+                        "phone": "923895270"
+                    }
+                ]
+            };
+
+            // Update current date
+            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('th-TH', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            // Update stats
+            document.getElementById('totalWarrants').textContent = warrantData.total_warrants;
+            document.getElementById('totalUnits').textContent = Object.keys(warrantData.units).length;
+            document.getElementById('expiringWarrants').textContent = warrantData.expiring_soon.length;
+            
+            const highPriorityCount = (warrantData.priorities.A || 0) + 
+                                     (warrantData.priorities.B || 0) + 
+                                     (warrantData.priorities.C || 0);
+            document.getElementById('highPriority').textContent = highPriorityCount;
+
+            // Update priority counts
+            ['A', 'B', 'C', 'D', 'F', 'G'].forEach(function(priority) {
+                const count = warrantData.priorities[priority] || 0;
+                document.getElementById('priority-' + priority.toLowerCase() + '-count').textContent = count;
+            });
+
+            // Unit Chart
+            const unitCtx = document.getElementById('unitChart').getContext('2d');
+            const unitLabels = Object.keys(warrantData.units);
+            const unitData = Object.values(warrantData.units);
+            
+            new Chart(unitCtx, {
+                type: 'bar',
+                data: {
+                    labels: unitLabels,
+                    datasets: [{
+                        label: 'จำนวนหมายจับ',
+                        data: unitData,
+                        backgroundColor: [
+                            'rgba(0, 102, 204, 0.8)',
+                            'rgba(72, 187, 120, 0.8)',
+                            'rgba(237, 137, 54, 0.8)',
+                            'rgba(229, 62, 62, 0.8)',
+                            'rgba(49, 130, 206, 0.8)',
+                            'rgba(128, 90, 213, 0.8)',
+                            'rgba(214, 158, 46, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(0, 102, 204, 1)',
+                            'rgba(72, 187, 120, 1)',
+                            'rgba(237, 137, 54, 1)',
+                            'rgba(229, 62, 62, 1)',
+                            'rgba(49, 130, 206, 1)',
+                            'rgba(128, 90, 213, 1)',
+                            'rgba(214, 158, 46, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Priority Chart
+            const priorityCtx = document.getElementById('priorityChart').getContext('2d');
+            const priorityLabels = ['A - ผู้มีอิทธิพล', 'B - คดีสำคัญ', 'C - หมายแดง', 'D - ใกล้หมดอายุ', 'F - ในคุก', 'G - ตาย'];
+            const priorityData = ['A', 'B', 'C', 'D', 'F', 'G'].map(function(p) { return warrantData.priorities[p] || 0; });
+            
+            new Chart(priorityCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: priorityLabels,
+                    datasets: [{
+                        data: priorityData,
+                        backgroundColor: [
+                            'rgba(229, 62, 62, 0.8)',
+                            'rgba(221, 107, 32, 0.8)',
+                            'rgba(214, 158, 46, 0.8)',
+                            'rgba(56, 161, 105, 0.8)',
+                            'rgba(49, 130, 206, 0.8)',
+                            'rgba(128, 90, 213, 0.8)'
+                        ],
+                        borderColor: '#fff',
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Alert Section
+            const alertContainer = document.getElementById('alertContainer');
+            if (warrantData.expiring_soon.length > 0) {
+                warrantData.expiring_soon.forEach(function(alert) {
+                    const alertItem = document.createElement('div');
+                    alertItem.className = 'alert-item';
+                    alertItem.innerHTML = '<div class="alert-item-header"><div class="alert-case">คดีเลขที่ ' + alert.case_number + ' | หมายจับเลขที่ ' + alert.warrant_number + '</div><div class="alert-days">เหลือ ' + alert.days_remaining + ' วัน</div></div><div class="alert-details"><div><span class="alert-suspect">ผู้ต้องหา:</span> ' + alert.suspect + '</div><div><span class="alert-suspect">ข้อหา:</span> ' + alert.charge + '</div><div><span class="alert-suspect">หน่วยงาน:</span> ' + alert.unit + '</div><div><span class="alert-suspect">หมดอายุความ:</span> ' + alert.expiry_date + '</div></div>';
+                    alertContainer.appendChild(alertItem);
+                });
+            } else {
+                alertContainer.innerHTML = '<div class="no-data">✅ ไม่มีหมายจับที่ใกล้หมดอายุความในขณะนี้</div>';
+            }
+
+            // Data Table
+            const tableBody = document.getElementById('warrantTableBody');
+            warrantData.warrant_details.forEach(function(warrant) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td>' + warrant.case_number + '</td><td>' + warrant.warrant_number + '</td><td>' + warrant.suspect + '</td><td style="max-width: 300px;">' + warrant.charge + '</td><td>' + warrant.unit + '</td><td><span class="priority-tag ' + warrant.priority.toLowerCase() + '">' + warrant.priority + '</span></td><td><span class="status-badge">' + warrant.status + '</span></td><td>' + warrant.expiry_date + '</td><td style="font-weight: 600; color: ' + (warrant.days_remaining < 365 ? '#c53030' : '#48bb78') + '">' + warrant.days_remaining.toLocaleString() + ' วัน</td>';
+                tableBody.appendChild(row);
+            });
+        }
+    </script>
+</body>
+</html>": "29/2568",
+                        "warrant_number": "43/2569",
+                        "suspect": "นาย วิชัย  ดวงจันทร์",
+                        "id_number": "5800400030024",
+                        "charge": "ฉ้อโกงโดยแสดงตนเป็นคนอื่น",
+                        "unit": "กก.5 บก.ป.",
+                        "status
